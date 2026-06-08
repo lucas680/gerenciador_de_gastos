@@ -1,30 +1,38 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:gerenciador_de_gastos/main.dart';
+import 'package:gerenciador_de_gastos/models/models.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('Serialização mensal (JSON round-trip)', () {
+    final dados = FinanceData.exemplo();
+    final json = dados.toJson();
+    final restaurado = FinanceData.fromJson(json);
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    expect(restaurado.meses.length, equals(dados.meses.length));
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    final mesKey = dados.meses.keys.first;
+    final mes = restaurado.meses[mesKey]!;
+    expect(mes.gastosGerais.isNotEmpty, isTrue);
+    expect(mes.entradas.first.valor, equals(5288));
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  test('Total de transporte = quantidade × valor unitário', () {
+    final t = TransportEntry(
+      id: '1',
+      tipo: 'Ônibus',
+      quantidade: 3,
+      valorUnitario: 5.5,
+    );
+    expect(t.total, equals(16.5));
+  });
+
+  test('Template aplica dados para novo mês', () {
+    final tmpl = TemplateData.padrao();
+    final mes = tmpl.aplicarPara(2025, 1);
+    expect(mes.year, equals(2025));
+    expect(mes.month, equals(1));
+    expect(mes.gastosGerais.isNotEmpty, isTrue);
+    // Gastos fixos do template começam com pago = false.
+    expect(mes.gastosGerais.every((e) => !e.pago), isTrue);
   });
 }
