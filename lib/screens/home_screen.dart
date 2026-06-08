@@ -351,34 +351,35 @@ class _HomeScreenState extends State<HomeScreen> {
         onDestinationSelected: (i) => setState(() => _indice = i),
         indicatorColor: AppCores.verdeFundo,
         overlayColor: WidgetStateProperty.all(Colors.transparent),
+        labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home, color: AppCores.verde),
-            label: '',
+            label: 'Início',
           ),
           NavigationDestination(
             icon: Icon(Icons.directions_bus_outlined),
             selectedIcon:
                 Icon(Icons.directions_bus, color: AppCores.verde),
-            label: '',
+            label: 'Transporte',
           ),
           NavigationDestination(
             icon: Icon(Icons.restaurant_outlined),
             selectedIcon:
                 Icon(Icons.restaurant, color: AppCores.verde),
-            label: '',
+            label: 'Alimentos',
           ),
           NavigationDestination(
             icon: Icon(Icons.shopping_bag_outlined),
             selectedIcon:
                 Icon(Icons.shopping_bag, color: AppCores.verde),
-            label: '',
+            label: 'Extras',
           ),
           NavigationDestination(
             icon: Icon(Icons.swap_vert_outlined),
             selectedIcon: Icon(Icons.swap_vert, color: AppCores.verde),
-            label: '',
+            label: 'Entradas',
           ),
         ],
       ),

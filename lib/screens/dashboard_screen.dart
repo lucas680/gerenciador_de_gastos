@@ -32,27 +32,30 @@ class DashboardScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _ResumoCategorias(provider: provider),
           const SizedBox(height: 18),
-          Row(
-            children: [
-              const Icon(Icons.receipt_long, color: AppCores.verde),
-              const SizedBox(width: 8),
-              Text(
-                'Gastos gerais',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey.shade800,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: Row(
+              children: [
+                const Icon(Icons.receipt_long, color: AppCores.verde),
+                const SizedBox(width: 8),
+                Text(
+                  'Gastos gerais',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey.shade800,
+                  ),
                 ),
-              ),
-              const Spacer(),
-              Text(
-                formatarReal(provider.totalGastosGerais),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppCores.verde,
+                const Spacer(),
+                Text(
+                  formatarReal(provider.totalGastosGerais),
+                  style: const TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: AppCores.verde,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           const SizedBox(height: 8),
           if (gastos.isEmpty)
@@ -68,7 +71,7 @@ class DashboardScreen extends StatelessWidget {
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
-            heroTag: null,
+        heroTag: null,
         onPressed: () =>
             mostrarFormDespesa(context, provider, Categoria.gastosGerais),
         icon: const Icon(Icons.add),
@@ -115,8 +118,7 @@ class _CardProgresso extends StatelessWidget {
                 children: [
                   const Text(
                     'Gastos fixos pagos',
-                    style: TextStyle(
-                        fontWeight: FontWeight.bold, fontSize: 15),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                   ),
                   const SizedBox(height: 4),
                   Text(
@@ -140,9 +142,24 @@ class _ResumoCategorias extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final itens = [
-      (Icons.directions_bus, 'Transporte', provider.totalTransporte),
-      (Icons.restaurant, 'Alimentação', provider.totalAlimentacao),
-      (Icons.shopping_bag, 'Extras', provider.totalGastosExtras),
+      (
+        Icons.directions_bus,
+        'Transporte',
+        provider.totalTransporte,
+        provider.orcamentoTransporte,
+      ),
+      (
+        Icons.restaurant,
+        'Alimentação',
+        provider.totalAlimentacao,
+        provider.orcamentoAlimentacao,
+      ),
+      (
+        Icons.shopping_bag,
+        'Extras',
+        provider.totalGastosExtras,
+        provider.orcamentoGastosExtras,
+      ),
     ];
     return Card(
       child: Padding(
@@ -150,20 +167,36 @@ class _ResumoCategorias extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: itens.map((it) {
+            final gasto = it.$3;
+            final orcamento = it.$4;
+            final percent = orcamento > 0
+                ? (gasto / orcamento).clamp(0.0, 1.0)
+                : 0.0;
+            final excedeu = orcamento > 0 && gasto > orcamento;
+            final cor = excedeu ? AppCores.vermelho : AppCores.verde;
             return Column(
               children: [
-                CircleAvatar(
+                CircularPercentIndicator(
+                  radius: 30,
+                  lineWidth: 5,
+                  percent: percent,
+                  animation: true,
+                  circularStrokeCap: CircularStrokeCap.round,
+                  progressColor: cor,
                   backgroundColor: AppCores.verdeFundo,
-                  child: Icon(it.$1, color: AppCores.verde, size: 20),
+                  center: Icon(it.$1, color: cor, size: 20),
                 ),
                 const SizedBox(height: 6),
                 Text(it.$2, style: const TextStyle(fontSize: 12)),
                 const SizedBox(height: 2),
                 Text(
-                  formatarReal(it.$3),
-                  style: const TextStyle(
+                  orcamento > 0
+                      ? '${(percent * 100).toStringAsFixed(0)}%'
+                      : formatarReal(gasto),
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
+                    color: excedeu ? AppCores.vermelho : Colors.black87,
                   ),
                 ),
               ],
@@ -212,8 +245,7 @@ class _LinhaGasto extends StatelessWidget {
       child: Card(
         margin: const EdgeInsets.symmetric(vertical: 5),
         child: ListTile(
-          onTap: () =>
-              provider.alternarPago(Categoria.gastosGerais, gasto.id),
+          onTap: () => provider.alternarPago(Categoria.gastosGerais, gasto.id),
           leading: Checkbox(
             value: gasto.pago,
             activeColor: AppCores.verde,
